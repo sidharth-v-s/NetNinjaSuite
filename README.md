@@ -24,11 +24,12 @@ A comprehensive, interactive terminal-based networking utility suite for securit
 - Default values with complete customization options
 
 ### 📊 Results Management
-- Real-time timestamped result logging
-- Comprehensive filtering system to search through results
+- **Inline Results Display** - Results appear directly within each tool's window
+- Real-time timestamped result logging with color-coded status
+- Tool-specific result filtering (clear results per tool)
+- Comprehensive filtering system to search through all results
 - Export results to timestamped files in organized directories
-- Clear results and configuration saving options
-- Color-coded result display based on scan type and success/failure
+- Live scan progress indicators within each tool interface
 
 ## Installation
 
@@ -127,16 +128,21 @@ Each tool provides configurable settings:
 ### Results Management
 
 **Viewing Results:**
-1. Navigate to "View Results" from main menu
-2. Browse through timestamped scan results
-3. Results are color-coded by type and status
+1. Results appear directly within each tool's interface as scans complete
+2. Each tool shows its specific results in real-time below the menu options
+3. Results are color-coded by type and status (green for success, red for errors, yellow for warnings)
+4. Navigate to "View Results" from main menu for consolidated view of all results
 
-**Available Options:**
-- **Clear Results** - Remove all current results
-- **Export Results** - Save to timestamped file in results/ directory
-- **Save Configuration** - Export current tool settings
-- **Filter Results** - Search results by keyword
+**Available Options in Each Tool:**
+- **Start Scan** - Begin scanning with current settings
+- **Configure Settings** - Modify tool-specific parameters
+- **Clear Results** - Remove results for this specific tool only
 - **Back to Main Menu** - Return to main interface
+
+**Global Results Management:**
+- **View Results** - See all results from all tools in one consolidated view
+- **Export Results** - Save all results to timestamped file in results/ directory
+- **Filter Results** - Search through all results by keyword
 
 **Export Formats:**
 - Results are exported to `results/scan_results_YYYYMMDD_HHMMSS.txt`

@@ -23,6 +23,7 @@ It's designed for network administrators, security professionals, and developers
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Interface preference: Results should display within each tool's window, not on separate pages.
 
 ## System Architecture
 

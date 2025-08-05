@@ -150,7 +150,7 @@ class NetworkToolsUI:
         self.draw_instructions(["↑↓: Navigate", "Enter: Select", "q: Quit"])
 
     def draw_port_scanner_menu(self):
-        """Draw the port scanner interface"""
+        """Draw the port scanner interface with inline results"""
         self.draw_header()
         
         self.stdscr.addstr(6, 4, "Port Scanner", curses.color_pair(5) | curses.A_BOLD)
@@ -167,7 +167,7 @@ class NetworkToolsUI:
         self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
-        menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
+        menu_items = ["Start Scan", "Configure Settings", "Clear Results", "Back to Main Menu"]
         
         y += 3
         for i, item in enumerate(menu_items):
@@ -179,11 +179,36 @@ class NetworkToolsUI:
         # Show scan progress if running
         if self.scan_in_progress:
             self.draw_scan_progress("Port scanning in progress...", y + len(menu_items) + 2)
+            y += len(menu_items) + 4
+        else:
+            y += len(menu_items) + 2
         
-        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "b: Back"])
+        # Show port scanner results inline
+        port_results = [r for r in self.results if "Port" in r or "OPEN" in r or "scan" in r.lower()]
+        if port_results:
+            self.stdscr.addstr(y, 4, "Scan Results:", curses.color_pair(4) | curses.A_BOLD)
+            y += 1
+            
+            # Show last 10 results to fit in window
+            for result in port_results[-10:]:
+                if y >= self.max_y - 4:
+                    break
+                
+                # Color code results
+                if "OPEN" in result:
+                    color = curses.color_pair(1)  # Green for open ports
+                elif "ERROR" in result or "Failed" in result:
+                    color = curses.color_pair(2)  # Red for errors
+                else:
+                    color = curses.color_pair(4)  # Cyan for info
+                
+                self.stdscr.addstr(y, 6, result[:self.max_x-8], color)
+                y += 1
+        
+        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "ESC: Stop Scan", "b: Back"])
 
     def draw_directory_buster_menu(self):
-        """Draw the directory buster interface"""
+        """Draw the directory buster interface with inline results"""
         self.draw_header()
         
         self.stdscr.addstr(6, 4, "Directory Buster", curses.color_pair(5) | curses.A_BOLD)
@@ -202,7 +227,7 @@ class NetworkToolsUI:
         self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
-        menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
+        menu_items = ["Start Scan", "Configure Settings", "Clear Results", "Back to Main Menu"]
         
         y += 3
         for i, item in enumerate(menu_items):
@@ -213,11 +238,38 @@ class NetworkToolsUI:
         
         if self.scan_in_progress:
             self.draw_scan_progress("Directory busting in progress...", y + len(menu_items) + 2)
+            y += len(menu_items) + 4
+        else:
+            y += len(menu_items) + 2
         
-        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "b: Back"])
+        # Show directory buster results inline
+        dir_results = [r for r in self.results if "Found:" in r or "directory" in r.lower() or "Status:" in r]
+        if dir_results:
+            self.stdscr.addstr(y, 4, "Found Directories/Files:", curses.color_pair(4) | curses.A_BOLD)
+            y += 1
+            
+            # Show last 10 results to fit in window
+            for result in dir_results[-10:]:
+                if y >= self.max_y - 4:
+                    break
+                
+                # Color code results
+                if "Status: 200" in result or "Found:" in result:
+                    color = curses.color_pair(1)  # Green for found items
+                elif "Status: 403" in result or "Status: 401" in result:
+                    color = curses.color_pair(3)  # Yellow for restricted
+                elif "ERROR" in result:
+                    color = curses.color_pair(2)  # Red for errors
+                else:
+                    color = curses.color_pair(4)  # Cyan for info
+                
+                self.stdscr.addstr(y, 6, result[:self.max_x-8], color)
+                y += 1
+        
+        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "ESC: Stop Scan", "b: Back"])
 
     def draw_vhost_scanner_menu(self):
-        """Draw the virtual host scanner interface"""
+        """Draw the virtual host scanner interface with inline results"""
         self.draw_header()
         
         self.stdscr.addstr(6, 4, "Virtual Host Scanner", curses.color_pair(5) | curses.A_BOLD)
@@ -234,7 +286,7 @@ class NetworkToolsUI:
         self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
-        menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
+        menu_items = ["Start Scan", "Configure Settings", "Clear Results", "Back to Main Menu"]
         
         y += 3
         for i, item in enumerate(menu_items):
@@ -245,11 +297,38 @@ class NetworkToolsUI:
         
         if self.scan_in_progress:
             self.draw_scan_progress("Virtual host scanning in progress...", y + len(menu_items) + 2)
+            y += len(menu_items) + 4
+        else:
+            y += len(menu_items) + 2
         
-        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "b: Back"])
+        # Show virtual host results inline
+        vhost_results = [r for r in self.results if "virtual host" in r.lower() or "Found:" in r and ("Status:" in r)]
+        if vhost_results:
+            self.stdscr.addstr(y, 4, "Found Virtual Hosts:", curses.color_pair(4) | curses.A_BOLD)
+            y += 1
+            
+            # Show last 10 results to fit in window
+            for result in vhost_results[-10:]:
+                if y >= self.max_y - 4:
+                    break
+                
+                # Color code results
+                if "Status: 200" in result:
+                    color = curses.color_pair(1)  # Green for successful
+                elif "Status: 403" in result or "Status: 401" in result:
+                    color = curses.color_pair(3)  # Yellow for restricted
+                elif "ERROR" in result:
+                    color = curses.color_pair(2)  # Red for errors
+                else:
+                    color = curses.color_pair(4)  # Cyan for info
+                
+                self.stdscr.addstr(y, 6, result[:self.max_x-8], color)
+                y += 1
+        
+        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "ESC: Stop Scan", "b: Back"])
 
     def draw_host_scanner_menu(self):
-        """Draw the host scanner interface"""
+        """Draw the host scanner interface with inline results"""
         self.draw_header()
         
         self.stdscr.addstr(6, 4, "Host Scanner", curses.color_pair(5) | curses.A_BOLD)
@@ -266,7 +345,7 @@ class NetworkToolsUI:
         self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
-        menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
+        menu_items = ["Start Scan", "Configure Settings", "Clear Results", "Back to Main Menu"]
         
         y += 3
         for i, item in enumerate(menu_items):
@@ -277,8 +356,33 @@ class NetworkToolsUI:
         
         if self.scan_in_progress:
             self.draw_scan_progress("Host discovery in progress...", y + len(menu_items) + 2)
+            y += len(menu_items) + 4
+        else:
+            y += len(menu_items) + 2
         
-        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "b: Back"])
+        # Show host discovery results inline
+        host_results = [r for r in self.results if "Host" in r and ("alive" in r or "up" in r.lower()) or "discovery" in r.lower()]
+        if host_results:
+            self.stdscr.addstr(y, 4, "Discovered Hosts:", curses.color_pair(4) | curses.A_BOLD)
+            y += 1
+            
+            # Show last 15 results to fit in window
+            for result in host_results[-15:]:
+                if y >= self.max_y - 4:
+                    break
+                
+                # Color code results
+                if "alive" in result or "up" in result.lower():
+                    color = curses.color_pair(1)  # Green for alive hosts
+                elif "ERROR" in result or "Failed" in result:
+                    color = curses.color_pair(2)  # Red for errors
+                else:
+                    color = curses.color_pair(4)  # Cyan for info
+                
+                self.stdscr.addstr(y, 6, result[:self.max_x-8], color)
+                y += 1
+        
+        self.draw_instructions(["↑↓: Navigate", "Enter: Select", "ESC: Stop Scan", "b: Back"])
 
     def draw_results_menu(self):
         """Draw the results viewer"""
@@ -359,7 +463,7 @@ class NetworkToolsUI:
         if self.current_menu == "main":
             return 6
         elif self.current_menu in ["port_scanner", "directory_buster", "vhost_scanner", "host_scanner"]:
-            return 3
+            return 4  # Now includes Clear Results option
         elif self.current_menu == "results":
             return 5
         return 1
@@ -386,7 +490,9 @@ class NetworkToolsUI:
                 self.start_scan()
             elif self.selected_option == 1:  # Configure Settings
                 self.configure_tool_settings()
-            elif self.selected_option == 2:  # Back
+            elif self.selected_option == 2:  # Clear Results
+                self.clear_tool_results()
+            elif self.selected_option == 3:  # Back
                 self.current_menu = "main"
                 self.selected_option = 0
         
@@ -731,3 +837,18 @@ class NetworkToolsUI:
         filtered = [result for result in self.original_results if filter_term.lower() in result.lower()]
         self.results = filtered
         self.show_message(f"Showing {len(filtered)} results containing '{filter_term}'")
+        
+    def clear_tool_results(self):
+        """Clear results for the current tool"""
+        tool_keywords = {
+            'port_scanner': ['port', 'OPEN', 'scan'],
+            'directory_buster': ['Found:', 'directory', 'Status:'],
+            'vhost_scanner': ['virtual host', 'Found:', 'Status:'],
+            'host_scanner': ['Host', 'alive', 'discovery']
+        }
+        
+        if self.current_menu in tool_keywords:
+            keywords = tool_keywords[self.current_menu]
+            # Remove results that contain any of the tool's keywords
+            self.results = [r for r in self.results if not any(keyword.lower() in r.lower() for keyword in keywords)]
+            self.show_message(f"{self.current_menu.replace('_', ' ').title()} results cleared")
