@@ -5,9 +5,18 @@ A comprehensive, interactive terminal-based networking utility suite for securit
 ## Features
 
 ### 🔍 Network Scanning Tools
-- **Port Scanner** - Multi-threaded TCP port scanning with customizable ranges
-- **Directory Buster** - Web directory and file enumeration using wordlists
-- **Virtual Host Scanner** - Subdomain discovery and virtual host identification
+- **Port Scanner** - Multi-threaded TCP port scanning with service detection and host discovery
+  - Service identification with banner grabbing
+  - Automatic host alive detection before scanning
+  - Support for port ranges, comma-separated lists, and single ports
+- **Directory Buster** - Web directory and file enumeration with detailed status analysis
+  - HTTP status code interpretation (OK, Forbidden, Unauthorized, etc.)
+  - Content size reporting for successful requests
+  - Error handling with connection status
+- **Virtual Host Scanner** - Subdomain discovery with alive/active status detection
+  - Differentiates between active virtual hosts and default responses
+  - Status code analysis with meaningful descriptions
+  - ALIVE/POSSIBLE classification for discovered hosts
 - **Host Scanner** - Network discovery using ping and TCP connection methods
 
 ### 🎯 Interactive Terminal Interface
@@ -108,6 +117,8 @@ Each tool provides configurable settings:
 - Port range (e.g., "1-1000", "80,443,8080")
 - Thread count (1-100)
 - Connection timeout (seconds)
+- Service detection (ON/OFF)
+- Host discovery (ON/OFF)
 
 **Directory Buster:**
 - Wordlist file path

@@ -51,7 +51,9 @@ class NetworkToolsUI:
             'port_scanner': {
                 'port_range': '1-1000',
                 'threads': self.config.DEFAULT_THREADS,
-                'timeout': self.config.PORT_SCAN_TIMEOUT
+                'timeout': self.config.PORT_SCAN_TIMEOUT,
+                'service_detection': True,
+                'host_discovery': True
             },
             'directory_buster': {
                 'wordlist': 'wordlists/common_dirs.txt',
@@ -165,6 +167,12 @@ class NetworkToolsUI:
         self.stdscr.addstr(y, 6, f"Threads: {settings['threads']}", curses.color_pair(3))
         y += 1
         self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
+        y += 1
+        service_status = "ON" if settings['service_detection'] else "OFF"
+        self.stdscr.addstr(y, 6, f"Service Detection: {service_status}", curses.color_pair(3))
+        y += 1
+        host_status = "ON" if settings['host_discovery'] else "OFF"
+        self.stdscr.addstr(y, 6, f"Host Discovery: {host_status}", curses.color_pair(3))
         
         # Menu options
         menu_items = ["Start Scan", "Configure Settings", "Clear Results", "Back to Main Menu"]
@@ -595,6 +603,11 @@ class NetworkToolsUI:
         try:
             self.add_scan_result("PORT", f"Starting port scan on {target} - Range: {port_range}")
             settings = self.tool_settings['port_scanner']
+            
+            # Configure port scanner with UI settings
+            self.port_scanner.timeout = settings['timeout']
+            self.port_scanner.service_detection = settings['service_detection']
+            self.port_scanner.host_discovery = settings['host_discovery']
             results = self.port_scanner.scan(target, port_range, settings['threads'])
             for result in results:
                 self.add_scan_result("PORT", result)
