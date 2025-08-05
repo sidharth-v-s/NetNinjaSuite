@@ -6,6 +6,8 @@ Handles all curses-based user interface operations
 import curses
 import threading
 import time
+import datetime
+import os
 from network_tools import PortScanner, DirectoryBuster, VirtualHostScanner, HostScanner
 from config import Config
 
@@ -43,6 +45,31 @@ class NetworkToolsUI:
         self.results = []
         self.scan_in_progress = False
         self.scan_thread = None
+        
+        # Tool settings
+        self.tool_settings = {
+            'port_scanner': {
+                'port_range': '1-1000',
+                'threads': self.config.DEFAULT_THREADS,
+                'timeout': self.config.PORT_SCAN_TIMEOUT
+            },
+            'directory_buster': {
+                'wordlist': 'wordlists/common_dirs.txt',
+                'extensions': 'php,html,txt,js,asp,aspx,jsp',
+                'threads': self.config.DIR_SCAN_THREADS,
+                'timeout': self.config.DIR_SCAN_TIMEOUT
+            },
+            'vhost_scanner': {
+                'wordlist': 'wordlists/common_vhosts.txt',
+                'threads': self.config.VHOST_SCAN_THREADS,
+                'timeout': self.config.VHOST_SCAN_TIMEOUT
+            },
+            'host_scanner': {
+                'method': 'ping+tcp',
+                'threads': self.config.HOST_SCAN_THREADS,
+                'timeout': self.config.HOST_SCAN_TIMEOUT
+            }
+        }
 
     def run(self):
         """Main application loop"""
@@ -128,21 +155,16 @@ class NetworkToolsUI:
         
         self.stdscr.addstr(6, 4, "Port Scanner", curses.color_pair(5) | curses.A_BOLD)
         
-        # Input fields
+        # Current settings
+        settings = self.tool_settings['port_scanner']
         y = 8
-        self.stdscr.addstr(y, 4, "Target Host/IP:", curses.color_pair(4))
+        self.stdscr.addstr(y, 4, "Current Settings:", curses.color_pair(4) | curses.A_BOLD)
         y += 1
-        self.stdscr.addstr(y, 6, "[Enter target] ", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Port Range:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Port Range: {settings['port_range']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "1-1000 (default)", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Threads:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Threads: {settings['threads']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, f"{self.config.DEFAULT_THREADS} (default)", curses.color_pair(3))
+        self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
         menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
@@ -166,21 +188,18 @@ class NetworkToolsUI:
         
         self.stdscr.addstr(6, 4, "Directory Buster", curses.color_pair(5) | curses.A_BOLD)
         
-        # Input fields
+        # Current settings  
+        settings = self.tool_settings['directory_buster']
         y = 8
-        self.stdscr.addstr(y, 4, "Target URL:", curses.color_pair(4))
+        self.stdscr.addstr(y, 4, "Current Settings:", curses.color_pair(4) | curses.A_BOLD)
         y += 1
-        self.stdscr.addstr(y, 6, "[Enter URL] ", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Wordlist:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Wordlist: {settings['wordlist']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "common_dirs.txt (default)", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Extensions:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Extensions: {settings['extensions']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "php,html,txt,js (default)", curses.color_pair(3))
+        self.stdscr.addstr(y, 6, f"Threads: {settings['threads']}", curses.color_pair(3))
+        y += 1
+        self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
         menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
@@ -203,21 +222,16 @@ class NetworkToolsUI:
         
         self.stdscr.addstr(6, 4, "Virtual Host Scanner", curses.color_pair(5) | curses.A_BOLD)
         
-        # Input fields
+        # Current settings
+        settings = self.tool_settings['vhost_scanner']
         y = 8
-        self.stdscr.addstr(y, 4, "Target IP:", curses.color_pair(4))
+        self.stdscr.addstr(y, 4, "Current Settings:", curses.color_pair(4) | curses.A_BOLD)
         y += 1
-        self.stdscr.addstr(y, 6, "[Enter IP] ", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Domain:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Wordlist: {settings['wordlist']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "[Enter domain] ", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Wordlist:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Threads: {settings['threads']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "common_vhosts.txt (default)", curses.color_pair(3))
+        self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
         menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
@@ -240,16 +254,16 @@ class NetworkToolsUI:
         
         self.stdscr.addstr(6, 4, "Host Scanner", curses.color_pair(5) | curses.A_BOLD)
         
-        # Input fields
+        # Current settings
+        settings = self.tool_settings['host_scanner']
         y = 8
-        self.stdscr.addstr(y, 4, "Network Range:", curses.color_pair(4))
+        self.stdscr.addstr(y, 4, "Current Settings:", curses.color_pair(4) | curses.A_BOLD)
         y += 1
-        self.stdscr.addstr(y, 6, "[Enter CIDR] ", curses.color_pair(3))
-        
-        y += 2
-        self.stdscr.addstr(y, 4, "Scan Type:", curses.color_pair(4))
+        self.stdscr.addstr(y, 6, f"Scan Method: {settings['method']}", curses.color_pair(3))
         y += 1
-        self.stdscr.addstr(y, 6, "Ping + ARP (default)", curses.color_pair(3))
+        self.stdscr.addstr(y, 6, f"Threads: {settings['threads']}", curses.color_pair(3))
+        y += 1
+        self.stdscr.addstr(y, 6, f"Timeout: {settings['timeout']}s", curses.color_pair(3))
         
         # Menu options
         menu_items = ["Start Scan", "Configure Settings", "Back to Main Menu"]
@@ -291,7 +305,7 @@ class NetworkToolsUI:
                 self.stdscr.addstr(y, 4, result[:self.max_x-6], color)
                 y += 1
         
-        menu_items = ["Clear Results", "Export Results", "Back to Main Menu"]
+        menu_items = ["Clear Results", "Export Results", "Save Configuration", "Filter Results", "Back to Main Menu"]
         
         y = self.max_y - 7
         for i, item in enumerate(menu_items):
@@ -347,7 +361,7 @@ class NetworkToolsUI:
         elif self.current_menu in ["port_scanner", "directory_buster", "vhost_scanner", "host_scanner"]:
             return 3
         elif self.current_menu == "results":
-            return 3
+            return 5
         return 1
 
     def handle_selection(self):
@@ -371,7 +385,7 @@ class NetworkToolsUI:
             if self.selected_option == 0:  # Start Scan
                 self.start_scan()
             elif self.selected_option == 1:  # Configure Settings
-                self.show_message("Configuration not implemented in this demo")
+                self.configure_tool_settings()
             elif self.selected_option == 2:  # Back
                 self.current_menu = "main"
                 self.selected_option = 0
@@ -382,7 +396,12 @@ class NetworkToolsUI:
                 self.show_message("Results cleared")
             elif self.selected_option == 1:  # Export Results
                 self.export_results()
-            elif self.selected_option == 2:  # Back
+            elif self.selected_option == 2:  # Save Configuration
+                self.save_configuration()
+            elif self.selected_option == 3:  # Filter Results
+                filter_term = self.get_user_input("Enter filter term (or leave empty to show all):")
+                self.filter_results(filter_term)
+            elif self.selected_option == 4:  # Back
                 self.current_menu = "main"
                 self.selected_option = 0
 
@@ -392,36 +411,71 @@ class NetworkToolsUI:
             self.show_message("Scan already in progress")
             return
         
-        # Get target from user input (simplified for demo)
-        target = self.get_user_input("Enter target: ")
-        if not target:
-            return
-        
         self.scan_in_progress = True
         
         if self.current_menu == "port_scanner":
+            target = self.get_user_input("Enter target host/IP:")
+            if not target:
+                self.scan_in_progress = False
+                return
+            
+            port_range = self.get_user_input(f"Port range (default: {self.tool_settings['port_scanner']['port_range']}):")
+            if not port_range:
+                port_range = self.tool_settings['port_scanner']['port_range']
+                
             self.scan_thread = threading.Thread(
                 target=self.run_port_scan, 
-                args=(target, "1-1000")
+                args=(target, port_range)
             )
+            
         elif self.current_menu == "directory_buster":
+            target = self.get_user_input("Enter target URL:")
+            if not target:
+                self.scan_in_progress = False
+                return
+                
+            wordlist = self.get_user_input(f"Wordlist file (default: {self.tool_settings['directory_buster']['wordlist']}):")
+            if not wordlist:
+                wordlist = self.tool_settings['directory_buster']['wordlist']
+                
+            extensions = self.get_user_input(f"Extensions (default: {self.tool_settings['directory_buster']['extensions']}):")
+            if not extensions:
+                extensions = self.tool_settings['directory_buster']['extensions']
+                
             self.scan_thread = threading.Thread(
                 target=self.run_directory_scan, 
-                args=(target,)
+                args=(target, wordlist, extensions)
             )
+            
         elif self.current_menu == "vhost_scanner":
-            domain = self.get_user_input("Enter domain: ")
+            target_ip = self.get_user_input("Enter target IP:")
+            if not target_ip:
+                self.scan_in_progress = False
+                return
+                
+            domain = self.get_user_input("Enter domain:")
             if not domain:
                 self.scan_in_progress = False
                 return
+                
+            wordlist = self.get_user_input(f"Wordlist file (default: {self.tool_settings['vhost_scanner']['wordlist']}):")
+            if not wordlist:
+                wordlist = self.tool_settings['vhost_scanner']['wordlist']
+                
             self.scan_thread = threading.Thread(
                 target=self.run_vhost_scan, 
-                args=(target, domain)
+                args=(target_ip, domain, wordlist)
             )
+            
         elif self.current_menu == "host_scanner":
+            network = self.get_user_input("Enter network range (CIDR, e.g., 192.168.1.0/24):")
+            if not network:
+                self.scan_in_progress = False
+                return
+                
             self.scan_thread = threading.Thread(
                 target=self.run_host_scan, 
-                args=(target,)
+                args=(network,)
             )
         
         if self.scan_thread:
@@ -433,46 +487,56 @@ class NetworkToolsUI:
     def run_port_scan(self, target, port_range):
         """Run port scan in separate thread"""
         try:
-            results = self.port_scanner.scan(target, port_range, self.config.DEFAULT_THREADS)
+            self.add_scan_result("PORT", f"Starting port scan on {target} - Range: {port_range}")
+            settings = self.tool_settings['port_scanner']
+            results = self.port_scanner.scan(target, port_range, settings['threads'])
             for result in results:
-                self.results.append(f"[PORT] {result}")
+                self.add_scan_result("PORT", result)
         except Exception as e:
-            self.results.append(f"[PORT] ERROR: {str(e)}")
+            self.add_scan_result("PORT", f"ERROR: {str(e)}")
         finally:
             self.scan_in_progress = False
+            self.add_scan_result("PORT", "Scan completed")
 
-    def run_directory_scan(self, target):
+    def run_directory_scan(self, target, wordlist, extensions):
         """Run directory scan in separate thread"""
         try:
-            results = self.directory_buster.scan(target, "wordlists/common_dirs.txt")
+            self.add_scan_result("DIR", f"Starting directory scan on {target}")
+            ext_list = extensions.split(',') if extensions else None
+            results = self.directory_buster.scan(target, wordlist, ext_list)
             for result in results:
-                self.results.append(f"[DIR] {result}")
+                self.add_scan_result("DIR", result)
         except Exception as e:
-            self.results.append(f"[DIR] ERROR: {str(e)}")
+            self.add_scan_result("DIR", f"ERROR: {str(e)}")
         finally:
             self.scan_in_progress = False
+            self.add_scan_result("DIR", "Scan completed")
 
-    def run_vhost_scan(self, target, domain):
+    def run_vhost_scan(self, target_ip, domain, wordlist):
         """Run virtual host scan in separate thread"""
         try:
-            results = self.vhost_scanner.scan(target, domain, "wordlists/common_vhosts.txt")
+            self.add_scan_result("VHOST", f"Starting virtual host scan on {target_ip} for {domain}")
+            results = self.vhost_scanner.scan(target_ip, domain, wordlist)
             for result in results:
-                self.results.append(f"[VHOST] {result}")
+                self.add_scan_result("VHOST", result)
         except Exception as e:
-            self.results.append(f"[VHOST] ERROR: {str(e)}")
+            self.add_scan_result("VHOST", f"ERROR: {str(e)}")
         finally:
             self.scan_in_progress = False
+            self.add_scan_result("VHOST", "Scan completed")
 
     def run_host_scan(self, target):
         """Run host scan in separate thread"""
         try:
+            self.add_scan_result("HOST", f"Starting host discovery on {target}")
             results = self.host_scanner.scan(target)
             for result in results:
-                self.results.append(f"[HOST] {result}")
+                self.add_scan_result("HOST", result)
         except Exception as e:
-            self.results.append(f"[HOST] ERROR: {str(e)}")
+            self.add_scan_result("HOST", f"ERROR: {str(e)}")
         finally:
             self.scan_in_progress = False
+            self.add_scan_result("HOST", "Scan completed")
 
     def stop_scan(self):
         """Stop current scan"""
@@ -481,10 +545,114 @@ class NetworkToolsUI:
             self.show_message("Scan stopped")
 
     def get_user_input(self, prompt):
-        """Get user input (simplified implementation)"""
-        # In a full implementation, this would create an input dialog
-        # For now, return a placeholder
-        return "127.0.0.1"  # Default for demo
+        """Get user input with a proper input dialog"""
+        # Save current screen
+        curses.curs_set(1)  # Show cursor
+        
+        # Draw input dialog
+        dialog_y = self.max_y // 2 - 3
+        dialog_x = 4
+        dialog_width = self.max_x - 8
+        
+        # Clear area and draw dialog box
+        for i in range(7):
+            self.stdscr.addstr(dialog_y + i, dialog_x, " " * dialog_width, curses.color_pair(6))
+        
+        # Draw border
+        self.stdscr.addstr(dialog_y, dialog_x, "+" + "-" * (dialog_width - 2) + "+", curses.color_pair(4))
+        self.stdscr.addstr(dialog_y + 6, dialog_x, "+" + "-" * (dialog_width - 2) + "+", curses.color_pair(4))
+        for i in range(1, 6):
+            self.stdscr.addstr(dialog_y + i, dialog_x, "|", curses.color_pair(4))
+            self.stdscr.addstr(dialog_y + i, dialog_x + dialog_width - 1, "|", curses.color_pair(4))
+        
+        # Draw prompt
+        self.stdscr.addstr(dialog_y + 2, dialog_x + 2, prompt, curses.color_pair(4) | curses.A_BOLD)
+        self.stdscr.addstr(dialog_y + 4, dialog_x + 2, "Enter value (ESC to cancel): ", curses.color_pair(4))
+        
+        # Input field
+        input_y = dialog_y + 4
+        input_x = dialog_x + 28
+        input_width = dialog_width - 30
+        
+        self.stdscr.addstr(input_y, input_x, "[" + " " * (input_width - 2) + "]", curses.color_pair(3))
+        self.stdscr.move(input_y, input_x + 1)
+        self.stdscr.refresh()
+        
+        # Get input
+        user_input = ""
+        while True:
+            key = self.stdscr.getch()
+            
+            if key == 27:  # ESC
+                curses.curs_set(0)
+                return None
+            elif key == 10 or key == 13:  # Enter
+                curses.curs_set(0)
+                return user_input.strip() if user_input.strip() else None
+            elif key == 8 or key == 127 or key == curses.KEY_BACKSPACE:  # Backspace
+                if user_input:
+                    user_input = user_input[:-1]
+                    self.stdscr.addstr(input_y, input_x + 1, user_input + " " * (input_width - len(user_input) - 2), curses.color_pair(3))
+                    self.stdscr.move(input_y, input_x + 1 + len(user_input))
+            elif 32 <= key <= 126 and len(user_input) < input_width - 3:  # Printable characters
+                user_input += chr(key)
+                self.stdscr.addstr(input_y, input_x + 1, user_input, curses.color_pair(3))
+            
+            self.stdscr.refresh()
+
+    def configure_tool_settings(self):
+        """Configure settings for the current tool"""
+        tool_name = self.current_menu
+        if tool_name not in self.tool_settings:
+            return
+            
+        settings = self.tool_settings[tool_name]
+        
+        if tool_name == "port_scanner":
+            new_range = self.get_user_input(f"Port range (current: {settings['port_range']}):")
+            if new_range:
+                settings['port_range'] = new_range
+                
+            new_threads = self.get_user_input(f"Thread count (current: {settings['threads']}):")
+            if new_threads and new_threads.isdigit():
+                settings['threads'] = int(new_threads)
+                
+            new_timeout = self.get_user_input(f"Timeout seconds (current: {settings['timeout']}):")
+            if new_timeout and new_timeout.isdigit():
+                settings['timeout'] = int(new_timeout)
+                
+        elif tool_name == "directory_buster":
+            new_wordlist = self.get_user_input(f"Wordlist path (current: {settings['wordlist']}):")
+            if new_wordlist:
+                settings['wordlist'] = new_wordlist
+                
+            new_extensions = self.get_user_input(f"Extensions (current: {settings['extensions']}):")
+            if new_extensions:
+                settings['extensions'] = new_extensions
+                
+            new_threads = self.get_user_input(f"Thread count (current: {settings['threads']}):")
+            if new_threads and new_threads.isdigit():
+                settings['threads'] = int(new_threads)
+                
+        elif tool_name == "vhost_scanner":
+            new_wordlist = self.get_user_input(f"Wordlist path (current: {settings['wordlist']}):")
+            if new_wordlist:
+                settings['wordlist'] = new_wordlist
+                
+            new_threads = self.get_user_input(f"Thread count (current: {settings['threads']}):")
+            if new_threads and new_threads.isdigit():
+                settings['threads'] = int(new_threads)
+                
+        elif tool_name == "host_scanner":
+            new_method = self.get_user_input(f"Scan method (current: {settings['method']}):")
+            if new_method:
+                settings['method'] = new_method
+                
+            new_threads = self.get_user_input(f"Thread count (current: {settings['threads']}):")
+            if new_threads and new_threads.isdigit():
+                settings['threads'] = int(new_threads)
+                
+        self.show_message("Settings updated successfully")
 
     def show_message(self, message):
         """Show a temporary message"""
@@ -501,11 +669,65 @@ class NetworkToolsUI:
         time.sleep(2)
 
     def export_results(self):
-        """Export results to file"""
+        """Export results to file with timestamp"""
         try:
-            with open("scan_results.txt", "w") as f:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"scan_results_{timestamp}.txt"
+            
+            # Create results directory if it doesn't exist
+            os.makedirs("results", exist_ok=True)
+            filepath = os.path.join("results", filename)
+            
+            with open(filepath, "w") as f:
+                f.write(f"Network Tools Scan Results\n")
+                f.write(f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 60 + "\n\n")
+                
                 for result in self.results:
                     f.write(result + "\n")
-            self.show_message("Results exported to scan_results.txt")
+                
+                f.write(f"\nTotal results: {len(self.results)}\n")
+                
+            self.show_message(f"Results exported to {filepath}")
         except Exception as e:
             self.show_error(f"Export failed: {str(e)}")
+    
+    def save_configuration(self):
+        """Save current configuration to file"""
+        try:
+            config_file = "network_tools_config.txt"
+            with open(config_file, "w") as f:
+                f.write("Network Tools Configuration\n")
+                f.write(f"Saved: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 40 + "\n\n")
+                
+                for tool, settings in self.tool_settings.items():
+                    f.write(f"{tool.upper()}:\n")
+                    for key, value in settings.items():
+                        f.write(f"  {key}: {value}\n")
+                    f.write("\n")
+                    
+            self.show_message(f"Configuration saved to {config_file}")
+        except Exception as e:
+            self.show_error(f"Save failed: {str(e)}")
+            
+    def add_scan_result(self, result_type, message):
+        """Add a scan result with timestamp"""
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        formatted_result = f"[{timestamp}] [{result_type}] {message}"
+        self.results.append(formatted_result)
+        
+    def filter_results(self, filter_term):
+        """Filter results based on search term"""
+        if not filter_term:
+            self.show_message("Showing all results")
+            return
+            
+        # Store original results
+        if not hasattr(self, 'original_results'):
+            self.original_results = self.results.copy()
+        
+        # Filter results
+        filtered = [result for result in self.original_results if filter_term.lower() in result.lower()]
+        self.results = filtered
+        self.show_message(f"Showing {len(filtered)} results containing '{filter_term}'")

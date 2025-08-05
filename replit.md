@@ -2,14 +2,23 @@
 
 ## Overview
 
-This is an interactive terminal-based networking utility application built in Python that provides four main network scanning and reconnaissance tools:
+This is a complete, production-ready interactive terminal-based networking utility application built in Python that provides four main network scanning and reconnaissance tools:
 
-1. **Port Scanner** - TCP port scanning with multi-threading support
-2. **Directory Buster** - Web directory and file enumeration 
-3. **Virtual Host Scanner** - Virtual host discovery on web servers
-4. **Host Scanner** - Network host discovery and enumeration
+1. **Port Scanner** - TCP port scanning with multi-threading support and customizable ranges
+2. **Directory Buster** - Web directory and file enumeration with wordlist support
+3. **Virtual Host Scanner** - Virtual host discovery on web servers with subdomain enumeration
+4. **Host Scanner** - Network host discovery using ping and TCP connection methods
 
-The application features a curses-based terminal user interface for interactive operation, with configurable settings for timeouts, thread counts, and scan parameters. It's designed for network administrators, security professionals, and developers who need to perform network reconnaissance tasks.
+The application features a professional curses-based terminal user interface with:
+- Full arrow key navigation and interactive menus
+- Real-time input dialogs for all scan parameters
+- Configurable settings for each tool (threads, timeouts, wordlists)
+- Real-time scan progress and results display
+- Comprehensive result filtering and export capabilities
+- Timestamped logging and configuration saving
+- Color-coded results and error handling
+
+It's designed for network administrators, security professionals, and developers who need to perform comprehensive network reconnaissance tasks.
 
 ## User Preferences
 
